@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @generated SignedSource<<a7f3ca986725fa85a6926c9e7966669b>>
+ * @generated SignedSource<<06c5ef75b624d953e7a8d9297feaf816>>
  */
 
 /**
@@ -30,9 +30,7 @@ public object ReactNativeFeatureFlagsCxxInterop {
 
   @DoNotStrip @JvmStatic public external fun commonTestFlag(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun completeReactInstanceCreationOnBgThreadOnAndroid(): Boolean
-
-  @DoNotStrip @JvmStatic public external fun disableEventLoopOnBridgeless(): Boolean
+  @DoNotStrip @JvmStatic public external fun animatedShouldSignalBatch(): Boolean
 
   @DoNotStrip @JvmStatic public external fun disableMountItemReorderingAndroid(): Boolean
 
@@ -42,23 +40,17 @@ public object ReactNativeFeatureFlagsCxxInterop {
 
   @DoNotStrip @JvmStatic public external fun enableCppPropsIteratorSetter(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun enableDeletionOfUnmountedViews(): Boolean
-
   @DoNotStrip @JvmStatic public external fun enableEagerRootViewAttachment(): Boolean
-
-  @DoNotStrip @JvmStatic public external fun enableEventEmitterRetentionDuringGesturesOnAndroid(): Boolean
 
   @DoNotStrip @JvmStatic public external fun enableFabricLogs(): Boolean
 
   @DoNotStrip @JvmStatic public external fun enableFabricRenderer(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun enableFixForViewCommandRace(): Boolean
-
-  @DoNotStrip @JvmStatic public external fun enableGranularShadowTreeStateReconciliation(): Boolean
-
   @DoNotStrip @JvmStatic public external fun enableIOSViewClipToPaddingBox(): Boolean
 
   @DoNotStrip @JvmStatic public external fun enableImagePrefetchingAndroid(): Boolean
+
+  @DoNotStrip @JvmStatic public external fun enableJSRuntimeGCOnMemoryPressureOnIOS(): Boolean
 
   @DoNotStrip @JvmStatic public external fun enableLayoutAnimationsOnAndroid(): Boolean
 
@@ -66,9 +58,9 @@ public object ReactNativeFeatureFlagsCxxInterop {
 
   @DoNotStrip @JvmStatic public external fun enableLongTaskAPI(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun enableNewBackgroundAndBorderDrawables(): Boolean
+  @DoNotStrip @JvmStatic public external fun enableNativeCSSParsing(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun enablePreciseSchedulingForPremountItemsOnAndroid(): Boolean
+  @DoNotStrip @JvmStatic public external fun enableNewBackgroundAndBorderDrawables(): Boolean
 
   @DoNotStrip @JvmStatic public external fun enablePropsUpdateReconciliationAndroid(): Boolean
 
@@ -78,9 +70,13 @@ public object ReactNativeFeatureFlagsCxxInterop {
 
   @DoNotStrip @JvmStatic public external fun enableUIConsistency(): Boolean
 
+  @DoNotStrip @JvmStatic public external fun enableViewCulling(): Boolean
+
   @DoNotStrip @JvmStatic public external fun enableViewRecycling(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun excludeYogaFromRawProps(): Boolean
+  @DoNotStrip @JvmStatic public external fun enableViewRecyclingForText(): Boolean
+
+  @DoNotStrip @JvmStatic public external fun enableViewRecyclingForView(): Boolean
 
   @DoNotStrip @JvmStatic public external fun fixDifferentiatorEmittingUpdatesWithWrongParentTag(): Boolean
 
@@ -90,11 +86,13 @@ public object ReactNativeFeatureFlagsCxxInterop {
 
   @DoNotStrip @JvmStatic public external fun fuseboxEnabledRelease(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun initEagerTurboModulesOnNativeModulesQueueAndroid(): Boolean
+  @DoNotStrip @JvmStatic public external fun fuseboxNetworkInspectionEnabled(): Boolean
 
   @DoNotStrip @JvmStatic public external fun lazyAnimationCallbacks(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun loadVectorDrawablesOnImages(): Boolean
+  @DoNotStrip @JvmStatic public external fun removeTurboModuleManagerDelegateMutex(): Boolean
+
+  @DoNotStrip @JvmStatic public external fun throwExceptionInsteadOfDeadlockOnTurboModuleSetupDuringSyncRenderIOS(): Boolean
 
   @DoNotStrip @JvmStatic public external fun traceTurboModulePromiseRejectionsOnAndroid(): Boolean
 
@@ -104,17 +102,11 @@ public object ReactNativeFeatureFlagsCxxInterop {
 
   @DoNotStrip @JvmStatic public external fun useFabricInterop(): Boolean
 
-  @DoNotStrip @JvmStatic public external fun useImmediateExecutorInAndroidBridgeless(): Boolean
-
   @DoNotStrip @JvmStatic public external fun useNativeViewConfigsInBridgelessMode(): Boolean
-
-  @DoNotStrip @JvmStatic public external fun useOptimisedViewPreallocationOnAndroid(): Boolean
 
   @DoNotStrip @JvmStatic public external fun useOptimizedEventBatchingOnAndroid(): Boolean
 
   @DoNotStrip @JvmStatic public external fun useRawPropsJsiValue(): Boolean
-
-  @DoNotStrip @JvmStatic public external fun useRuntimeShadowNodeReferenceUpdate(): Boolean
 
   @DoNotStrip @JvmStatic public external fun useTurboModuleInterop(): Boolean
 

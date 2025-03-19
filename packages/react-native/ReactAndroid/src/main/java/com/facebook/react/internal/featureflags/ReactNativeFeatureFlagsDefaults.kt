@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @generated SignedSource<<85d40be44d053b58a74ad76467c8e5e9>>
+ * @generated SignedSource<<cbe1d77424b561149b0bda39955dffac>>
  */
 
 /**
@@ -25,9 +25,7 @@ public open class ReactNativeFeatureFlagsDefaults : ReactNativeFeatureFlagsProvi
 
   override fun commonTestFlag(): Boolean = false
 
-  override fun completeReactInstanceCreationOnBgThreadOnAndroid(): Boolean = true
-
-  override fun disableEventLoopOnBridgeless(): Boolean = false
+  override fun animatedShouldSignalBatch(): Boolean = false
 
   override fun disableMountItemReorderingAndroid(): Boolean = false
 
@@ -37,23 +35,17 @@ public open class ReactNativeFeatureFlagsDefaults : ReactNativeFeatureFlagsProvi
 
   override fun enableCppPropsIteratorSetter(): Boolean = false
 
-  override fun enableDeletionOfUnmountedViews(): Boolean = false
-
   override fun enableEagerRootViewAttachment(): Boolean = false
-
-  override fun enableEventEmitterRetentionDuringGesturesOnAndroid(): Boolean = false
 
   override fun enableFabricLogs(): Boolean = false
 
   override fun enableFabricRenderer(): Boolean = false
 
-  override fun enableFixForViewCommandRace(): Boolean = false
-
-  override fun enableGranularShadowTreeStateReconciliation(): Boolean = false
-
   override fun enableIOSViewClipToPaddingBox(): Boolean = false
 
   override fun enableImagePrefetchingAndroid(): Boolean = false
+
+  override fun enableJSRuntimeGCOnMemoryPressureOnIOS(): Boolean = false
 
   override fun enableLayoutAnimationsOnAndroid(): Boolean = false
 
@@ -61,9 +53,9 @@ public open class ReactNativeFeatureFlagsDefaults : ReactNativeFeatureFlagsProvi
 
   override fun enableLongTaskAPI(): Boolean = false
 
-  override fun enableNewBackgroundAndBorderDrawables(): Boolean = false
+  override fun enableNativeCSSParsing(): Boolean = false
 
-  override fun enablePreciseSchedulingForPremountItemsOnAndroid(): Boolean = false
+  override fun enableNewBackgroundAndBorderDrawables(): Boolean = false
 
   override fun enablePropsUpdateReconciliationAndroid(): Boolean = false
 
@@ -73,9 +65,13 @@ public open class ReactNativeFeatureFlagsDefaults : ReactNativeFeatureFlagsProvi
 
   override fun enableUIConsistency(): Boolean = false
 
+  override fun enableViewCulling(): Boolean = false
+
   override fun enableViewRecycling(): Boolean = false
 
-  override fun excludeYogaFromRawProps(): Boolean = false
+  override fun enableViewRecyclingForText(): Boolean = true
+
+  override fun enableViewRecyclingForView(): Boolean = true
 
   override fun fixDifferentiatorEmittingUpdatesWithWrongParentTag(): Boolean = true
 
@@ -85,11 +81,13 @@ public open class ReactNativeFeatureFlagsDefaults : ReactNativeFeatureFlagsProvi
 
   override fun fuseboxEnabledRelease(): Boolean = false
 
-  override fun initEagerTurboModulesOnNativeModulesQueueAndroid(): Boolean = true
+  override fun fuseboxNetworkInspectionEnabled(): Boolean = false
 
   override fun lazyAnimationCallbacks(): Boolean = false
 
-  override fun loadVectorDrawablesOnImages(): Boolean = true
+  override fun removeTurboModuleManagerDelegateMutex(): Boolean = false
+
+  override fun throwExceptionInsteadOfDeadlockOnTurboModuleSetupDuringSyncRenderIOS(): Boolean = false
 
   override fun traceTurboModulePromiseRejectionsOnAndroid(): Boolean = false
 
@@ -99,17 +97,11 @@ public open class ReactNativeFeatureFlagsDefaults : ReactNativeFeatureFlagsProvi
 
   override fun useFabricInterop(): Boolean = false
 
-  override fun useImmediateExecutorInAndroidBridgeless(): Boolean = true
-
   override fun useNativeViewConfigsInBridgelessMode(): Boolean = false
-
-  override fun useOptimisedViewPreallocationOnAndroid(): Boolean = false
 
   override fun useOptimizedEventBatchingOnAndroid(): Boolean = false
 
   override fun useRawPropsJsiValue(): Boolean = false
-
-  override fun useRuntimeShadowNodeReferenceUpdate(): Boolean = true
 
   override fun useTurboModuleInterop(): Boolean = false
 

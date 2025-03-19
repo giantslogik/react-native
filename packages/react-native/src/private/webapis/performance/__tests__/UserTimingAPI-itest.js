@@ -10,14 +10,19 @@
  * @fantom_flags enableLongTaskAPI:true
  */
 
-import setUpPerformanceObserver from '../../../setup/setUpPerformanceObserver';
-import ensureInstance from '../../../utilities/ensureInstance';
-import {PerformanceMark} from '../UserTiming';
-import {runWorkLoop} from '@react-native/fantom';
+import 'react-native/Libraries/Core/InitializeCore';
 
-import '../../../../../Libraries/Core/InitializeCore.js';
+import type Performance from 'react-native/src/private/webapis/performance/Performance';
+
+import * as Fantom from '@react-native/fantom';
+import setUpPerformanceObserver from 'react-native/src/private/setup/setUpPerformanceObserver';
+import ensureInstance from 'react-native/src/private/utilities/ensureInstance';
+import {PerformanceObserver} from 'react-native/src/private/webapis/performance/PerformanceObserver';
+import {PerformanceMark} from 'react-native/src/private/webapis/performance/UserTiming';
 
 setUpPerformanceObserver();
+
+declare var performance: Performance;
 
 describe('User Timing API', () => {
   describe('performance.mark()', () => {
@@ -43,7 +48,7 @@ describe('User Timing API', () => {
 
       expect(callback).not.toHaveBeenCalled();
 
-      runWorkLoop();
+      Fantom.runWorkLoop();
 
       expect(callback).toHaveBeenCalledTimes(1);
 

@@ -13,11 +13,8 @@ import com.facebook.react.bridge.JavaScriptExecutor
 import com.facebook.react.common.build.ReactBuildConfig
 import com.facebook.soloader.SoLoader
 
-public class HermesExecutor
-internal constructor(config: RuntimeConfig?, enableDebugger: Boolean, debuggerName: String) :
-    JavaScriptExecutor(
-        config?.let { initHybrid(enableDebugger, debuggerName, it.heapSizeMB) }
-            ?: initHybridDefaultConfig(enableDebugger, debuggerName)) {
+public class HermesExecutor internal constructor(enableDebugger: Boolean, debuggerName: String) :
+    JavaScriptExecutor(initHybridDefaultConfig(enableDebugger, debuggerName)) {
 
   override fun getName(): String = "HermesExecutor$mode"
 
@@ -45,7 +42,7 @@ internal constructor(config: RuntimeConfig?, enableDebugger: Boolean, debuggerNa
     private external fun initHybridDefaultConfig(
         enableDebugger: Boolean,
         debuggerName: String
-    ): HybridData?
+    ): HybridData
 
     @DoNotStrip
     @JvmStatic
@@ -53,6 +50,6 @@ internal constructor(config: RuntimeConfig?, enableDebugger: Boolean, debuggerNa
         enableDebugger: Boolean,
         debuggerName: String,
         heapSizeMB: Long
-    ): HybridData?
+    ): HybridData
   }
 }

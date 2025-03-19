@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @generated SignedSource<<b7909873b5a9f72390db3a451f719b83>>
+ * @generated SignedSource<<e76d584cb67e2feae209795beb2009d6>>
  * @flow strict
  */
 
@@ -30,20 +30,16 @@ export type ReactNativeFeatureFlagsJsOnly = $ReadOnly<{
   jsOnlyTestFlag: Getter<boolean>,
   animatedShouldDebounceQueueFlush: Getter<boolean>,
   animatedShouldUseSingleOp: Getter<boolean>,
+  avoidAnimatedRefInvalidation: Getter<boolean>,
+  avoidStateUpdateInAnimatedPropsMemo: Getter<boolean>,
   disableInteractionManager: Getter<boolean>,
-  disableInteractionManagerInBatchinator: Getter<boolean>,
   enableAccessToHostTreeInFabric: Getter<boolean>,
-  enableAnimatedAllowlist: Getter<boolean>,
-  enableAnimatedClearImmediateFix: Getter<boolean>,
-  enableAnimatedPropsMemo: Getter<boolean>,
   fixVirtualizeListCollapseWindowSize: Getter<boolean>,
   isLayoutAnimationEnabled: Getter<boolean>,
-  shouldSkipStateUpdatesForLoopingAnimations: Getter<boolean>,
+  scheduleAnimatedCleanupInMicrotask: Getter<boolean>,
   shouldUseAnimatedObjectForTransform: Getter<boolean>,
   shouldUseRemoveClippedSubviewsAsDefaultOnIOS: Getter<boolean>,
   shouldUseSetNativePropsInFabric: Getter<boolean>,
-  useInsertionEffectsForAnimations: Getter<boolean>,
-  useRefsForTextInputState: Getter<boolean>,
 }>;
 
 export type ReactNativeFeatureFlagsJsOnlyOverrides = OverridesFor<ReactNativeFeatureFlagsJsOnly>;
@@ -52,49 +48,45 @@ export type ReactNativeFeatureFlags = $ReadOnly<{
   ...ReactNativeFeatureFlagsJsOnly,
   commonTestFlag: Getter<boolean>,
   commonTestFlagWithoutNativeImplementation: Getter<boolean>,
-  completeReactInstanceCreationOnBgThreadOnAndroid: Getter<boolean>,
-  disableEventLoopOnBridgeless: Getter<boolean>,
+  animatedShouldSignalBatch: Getter<boolean>,
   disableMountItemReorderingAndroid: Getter<boolean>,
   enableAccumulatedUpdatesInRawPropsAndroid: Getter<boolean>,
   enableBridgelessArchitecture: Getter<boolean>,
   enableCppPropsIteratorSetter: Getter<boolean>,
-  enableDeletionOfUnmountedViews: Getter<boolean>,
   enableEagerRootViewAttachment: Getter<boolean>,
-  enableEventEmitterRetentionDuringGesturesOnAndroid: Getter<boolean>,
   enableFabricLogs: Getter<boolean>,
   enableFabricRenderer: Getter<boolean>,
-  enableFixForViewCommandRace: Getter<boolean>,
-  enableGranularShadowTreeStateReconciliation: Getter<boolean>,
   enableIOSViewClipToPaddingBox: Getter<boolean>,
   enableImagePrefetchingAndroid: Getter<boolean>,
+  enableJSRuntimeGCOnMemoryPressureOnIOS: Getter<boolean>,
   enableLayoutAnimationsOnAndroid: Getter<boolean>,
   enableLayoutAnimationsOnIOS: Getter<boolean>,
   enableLongTaskAPI: Getter<boolean>,
+  enableNativeCSSParsing: Getter<boolean>,
   enableNewBackgroundAndBorderDrawables: Getter<boolean>,
-  enablePreciseSchedulingForPremountItemsOnAndroid: Getter<boolean>,
   enablePropsUpdateReconciliationAndroid: Getter<boolean>,
   enableReportEventPaintTime: Getter<boolean>,
   enableSynchronousStateUpdates: Getter<boolean>,
   enableUIConsistency: Getter<boolean>,
+  enableViewCulling: Getter<boolean>,
   enableViewRecycling: Getter<boolean>,
-  excludeYogaFromRawProps: Getter<boolean>,
+  enableViewRecyclingForText: Getter<boolean>,
+  enableViewRecyclingForView: Getter<boolean>,
   fixDifferentiatorEmittingUpdatesWithWrongParentTag: Getter<boolean>,
   fixMappingOfEventPrioritiesBetweenFabricAndReact: Getter<boolean>,
   fixMountingCoordinatorReportedPendingTransactionsOnAndroid: Getter<boolean>,
   fuseboxEnabledRelease: Getter<boolean>,
-  initEagerTurboModulesOnNativeModulesQueueAndroid: Getter<boolean>,
+  fuseboxNetworkInspectionEnabled: Getter<boolean>,
   lazyAnimationCallbacks: Getter<boolean>,
-  loadVectorDrawablesOnImages: Getter<boolean>,
+  removeTurboModuleManagerDelegateMutex: Getter<boolean>,
+  throwExceptionInsteadOfDeadlockOnTurboModuleSetupDuringSyncRenderIOS: Getter<boolean>,
   traceTurboModulePromiseRejectionsOnAndroid: Getter<boolean>,
   useAlwaysAvailableJSErrorHandling: Getter<boolean>,
   useEditTextStockAndroidFocusBehavior: Getter<boolean>,
   useFabricInterop: Getter<boolean>,
-  useImmediateExecutorInAndroidBridgeless: Getter<boolean>,
   useNativeViewConfigsInBridgelessMode: Getter<boolean>,
-  useOptimisedViewPreallocationOnAndroid: Getter<boolean>,
   useOptimizedEventBatchingOnAndroid: Getter<boolean>,
   useRawPropsJsiValue: Getter<boolean>,
-  useRuntimeShadowNodeReferenceUpdate: Getter<boolean>,
   useTurboModuleInterop: Getter<boolean>,
   useTurboModules: Getter<boolean>,
 }>;
@@ -115,34 +107,24 @@ export const animatedShouldDebounceQueueFlush: Getter<boolean> = createJavaScrip
 export const animatedShouldUseSingleOp: Getter<boolean> = createJavaScriptFlagGetter('animatedShouldUseSingleOp', false);
 
 /**
+ * Changes `useAnimatedProps` to avoid invalidating the callback ref whenever `props` changes.
+ */
+export const avoidAnimatedRefInvalidation: Getter<boolean> = createJavaScriptFlagGetter('avoidAnimatedRefInvalidation', false);
+
+/**
+ * Changes `useAnimatedPropsMemo` to avoid state updates to invalidate the cached `AnimatedProps`.
+ */
+export const avoidStateUpdateInAnimatedPropsMemo: Getter<boolean> = createJavaScriptFlagGetter('avoidStateUpdateInAnimatedPropsMemo', false);
+
+/**
  * Disables InteractionManager and replaces its scheduler with `setImmediate`.
  */
 export const disableInteractionManager: Getter<boolean> = createJavaScriptFlagGetter('disableInteractionManager', false);
 
 /**
- * Skips InteractionManager in `Batchinator` and invokes callbacks synchronously.
- */
-export const disableInteractionManagerInBatchinator: Getter<boolean> = createJavaScriptFlagGetter('disableInteractionManagerInBatchinator', false);
-
-/**
  * Enables access to the host tree in Fabric using DOM-compatible APIs.
  */
 export const enableAccessToHostTreeInFabric: Getter<boolean> = createJavaScriptFlagGetter('enableAccessToHostTreeInFabric', false);
-
-/**
- * Enables Animated to skip non-allowlisted props and styles.
- */
-export const enableAnimatedAllowlist: Getter<boolean> = createJavaScriptFlagGetter('enableAnimatedAllowlist', true);
-
-/**
- * Enables an experimental to use the proper clearIntermediate instead of calling the wrong clearTimeout and canceling another timer.
- */
-export const enableAnimatedClearImmediateFix: Getter<boolean> = createJavaScriptFlagGetter('enableAnimatedClearImmediateFix', true);
-
-/**
- * Enables Animated to analyze props to minimize invalidating `AnimatedProps`.
- */
-export const enableAnimatedPropsMemo: Getter<boolean> = createJavaScriptFlagGetter('enableAnimatedPropsMemo', true);
 
 /**
  * Fixing an edge case where the current window size is not properly calculated with fast scrolling. Window size collapsed to 1 element even if windowSize more than the current amount of elements
@@ -155,9 +137,9 @@ export const fixVirtualizeListCollapseWindowSize: Getter<boolean> = createJavaSc
 export const isLayoutAnimationEnabled: Getter<boolean> = createJavaScriptFlagGetter('isLayoutAnimationEnabled', true);
 
 /**
- * If the animation is within Animated.loop, we do not send state updates to React.
+ * Changes the cleanup of`AnimatedProps` to occur in a microtask instead of synchronously during effect cleanup (for unmount) or subsequent mounts (for updates).
  */
-export const shouldSkipStateUpdatesForLoopingAnimations: Getter<boolean> = createJavaScriptFlagGetter('shouldSkipStateUpdatesForLoopingAnimations', true);
+export const scheduleAnimatedCleanupInMicrotask: Getter<boolean> = createJavaScriptFlagGetter('scheduleAnimatedCleanupInMicrotask', false);
 
 /**
  * Enables use of AnimatedObject for animating transform values.
@@ -175,16 +157,6 @@ export const shouldUseRemoveClippedSubviewsAsDefaultOnIOS: Getter<boolean> = cre
 export const shouldUseSetNativePropsInFabric: Getter<boolean> = createJavaScriptFlagGetter('shouldUseSetNativePropsInFabric', true);
 
 /**
- * Changes construction of the animation graph to `useInsertionEffect` instead of `useLayoutEffect`.
- */
-export const useInsertionEffectsForAnimations: Getter<boolean> = createJavaScriptFlagGetter('useInsertionEffectsForAnimations', true);
-
-/**
- * Enable a variant of TextInput that moves some state to refs to avoid unnecessary re-renders
- */
-export const useRefsForTextInputState: Getter<boolean> = createJavaScriptFlagGetter('useRefsForTextInputState', false);
-
-/**
  * Common flag for testing. Do NOT modify.
  */
 export const commonTestFlag: Getter<boolean> = createNativeFlagGetter('commonTestFlag', false);
@@ -193,13 +165,9 @@ export const commonTestFlag: Getter<boolean> = createNativeFlagGetter('commonTes
  */
 export const commonTestFlagWithoutNativeImplementation: Getter<boolean> = createNativeFlagGetter('commonTestFlagWithoutNativeImplementation', false);
 /**
- * Do not wait for a main-thread dispatch to complete init to start executing work on the JS thread on Android
+ * Enables start- and finishOperationBatch on any platform.
  */
-export const completeReactInstanceCreationOnBgThreadOnAndroid: Getter<boolean> = createNativeFlagGetter('completeReactInstanceCreationOnBgThreadOnAndroid', true);
-/**
- * The bridgeless architecture enables the event loop by default. This feature flag allows us to force disabling it in specific instances.
- */
-export const disableEventLoopOnBridgeless: Getter<boolean> = createNativeFlagGetter('disableEventLoopOnBridgeless', false);
+export const animatedShouldSignalBatch: Getter<boolean> = createNativeFlagGetter('animatedShouldSignalBatch', false);
 /**
  * Prevent FabricMountingManager from reordering mountitems, which may lead to invalid state on the UI thread
  */
@@ -209,7 +177,7 @@ export const disableMountItemReorderingAndroid: Getter<boolean> = createNativeFl
  */
 export const enableAccumulatedUpdatesInRawPropsAndroid: Getter<boolean> = createNativeFlagGetter('enableAccumulatedUpdatesInRawPropsAndroid', false);
 /**
- * Feature flag to enable the new bridgeless architecture. Note: Enabling this will force enable the following flags: `useTurboModules` & `enableFabricRenderer.
+ * Feature flag to enable the new bridgeless architecture. Note: Enabling this will force enable the following flags: `useTurboModules` & `enableFabricRenderer`.
  */
 export const enableBridgelessArchitecture: Getter<boolean> = createNativeFlagGetter('enableBridgelessArchitecture', false);
 /**
@@ -217,17 +185,9 @@ export const enableBridgelessArchitecture: Getter<boolean> = createNativeFlagGet
  */
 export const enableCppPropsIteratorSetter: Getter<boolean> = createNativeFlagGetter('enableCppPropsIteratorSetter', false);
 /**
- * Deletes views that were pre-allocated but never mounted on the screen.
- */
-export const enableDeletionOfUnmountedViews: Getter<boolean> = createNativeFlagGetter('enableDeletionOfUnmountedViews', false);
-/**
  * Feature flag to configure eager attachment of the root view/initialisation of the JS code.
  */
 export const enableEagerRootViewAttachment: Getter<boolean> = createNativeFlagGetter('enableEagerRootViewAttachment', false);
-/**
- * Enables the retention of EventEmitterWrapper on Android till the touch gesture is over to fix a bug on pressable (#44610)
- */
-export const enableEventEmitterRetentionDuringGesturesOnAndroid: Getter<boolean> = createNativeFlagGetter('enableEventEmitterRetentionDuringGesturesOnAndroid', false);
 /**
  * This feature flag enables logs for Fabric.
  */
@@ -237,14 +197,6 @@ export const enableFabricLogs: Getter<boolean> = createNativeFlagGetter('enableF
  */
 export const enableFabricRenderer: Getter<boolean> = createNativeFlagGetter('enableFabricRenderer', false);
 /**
- * Synchronise the view command dispatching with mounting of new transaction
- */
-export const enableFixForViewCommandRace: Getter<boolean> = createNativeFlagGetter('enableFixForViewCommandRace', false);
-/**
- * When enabled, the renderer would only fail commits when they propagate state and the last commit that updated state changed before committing.
- */
-export const enableGranularShadowTreeStateReconciliation: Getter<boolean> = createNativeFlagGetter('enableGranularShadowTreeStateReconciliation', false);
-/**
  * iOS Views will clip to their padding box vs border box
  */
 export const enableIOSViewClipToPaddingBox: Getter<boolean> = createNativeFlagGetter('enableIOSViewClipToPaddingBox', false);
@@ -252,6 +204,10 @@ export const enableIOSViewClipToPaddingBox: Getter<boolean> = createNativeFlagGe
  * When enabled, Andoid will build and initiate image prefetch requests on ImageShadowNode::layout
  */
 export const enableImagePrefetchingAndroid: Getter<boolean> = createNativeFlagGetter('enableImagePrefetchingAndroid', false);
+/**
+ * Trigger JS runtime GC on memory pressure event on iOS
+ */
+export const enableJSRuntimeGCOnMemoryPressureOnIOS: Getter<boolean> = createNativeFlagGetter('enableJSRuntimeGCOnMemoryPressureOnIOS', false);
 /**
  * When enabled, LayoutAnimations API will animate state changes on Android.
  */
@@ -265,13 +221,13 @@ export const enableLayoutAnimationsOnIOS: Getter<boolean> = createNativeFlagGett
  */
 export const enableLongTaskAPI: Getter<boolean> = createNativeFlagGetter('enableLongTaskAPI', false);
 /**
+ * Parse CSS strings using the Fabric CSS parser instead of ViewConfig processing
+ */
+export const enableNativeCSSParsing: Getter<boolean> = createNativeFlagGetter('enableNativeCSSParsing', false);
+/**
  * Use BackgroundDrawable and BorderDrawable instead of CSSBackgroundDrawable
  */
 export const enableNewBackgroundAndBorderDrawables: Getter<boolean> = createNativeFlagGetter('enableNewBackgroundAndBorderDrawables', false);
-/**
- * Moves execution of pre-mount items to outside the choregrapher in the main thread, so we can estimate idle time more precisely (Android only).
- */
-export const enablePreciseSchedulingForPremountItemsOnAndroid: Getter<boolean> = createNativeFlagGetter('enablePreciseSchedulingForPremountItemsOnAndroid', false);
 /**
  * When enabled, Android will receive prop updates based on the differences between the last rendered shadow node and the last committed shadow node.
  */
@@ -289,13 +245,21 @@ export const enableSynchronousStateUpdates: Getter<boolean> = createNativeFlagGe
  */
 export const enableUIConsistency: Getter<boolean> = createNativeFlagGetter('enableUIConsistency', false);
 /**
+ * Enables View Culling: as soon as a view goes off screen, it can be reused anywhere in the UI and pieced together with other items to create new UI elements.
+ */
+export const enableViewCulling: Getter<boolean> = createNativeFlagGetter('enableViewCulling', false);
+/**
  * Enables View Recycling. When enabled, individual ViewManagers must still opt-in.
  */
 export const enableViewRecycling: Getter<boolean> = createNativeFlagGetter('enableViewRecycling', false);
 /**
- * When enabled, rawProps in Props will not include Yoga specific props.
+ * Enables View Recycling for <Text> via ReactTextView/ReactTextViewManager.
  */
-export const excludeYogaFromRawProps: Getter<boolean> = createNativeFlagGetter('excludeYogaFromRawProps', false);
+export const enableViewRecyclingForText: Getter<boolean> = createNativeFlagGetter('enableViewRecyclingForText', true);
+/**
+ * Enables View Recycling for <View> via ReactViewGroup/ReactViewManager.
+ */
+export const enableViewRecyclingForView: Getter<boolean> = createNativeFlagGetter('enableViewRecyclingForView', true);
 /**
  * Fixes a bug in Differentiator where parent views may be referenced before they're created
  */
@@ -313,17 +277,21 @@ export const fixMountingCoordinatorReportedPendingTransactionsOnAndroid: Getter<
  */
 export const fuseboxEnabledRelease: Getter<boolean> = createNativeFlagGetter('fuseboxEnabledRelease', false);
 /**
- * Construct modules that requires eager init on the dedicate native modules thread
+ * Enable network inspection support in the React Native DevTools CDP backend. Requires `enableBridgelessArchitecture`. This flag is global and should not be changed across React Host lifetimes.
  */
-export const initEagerTurboModulesOnNativeModulesQueueAndroid: Getter<boolean> = createNativeFlagGetter('initEagerTurboModulesOnNativeModulesQueueAndroid', true);
+export const fuseboxNetworkInspectionEnabled: Getter<boolean> = createNativeFlagGetter('fuseboxNetworkInspectionEnabled', false);
 /**
  * Only enqueue Choreographer calls if there is an ongoing animation, instead of enqueueing every frame.
  */
 export const lazyAnimationCallbacks: Getter<boolean> = createNativeFlagGetter('lazyAnimationCallbacks', false);
 /**
- * Adds support for loading vector drawable assets in the Image component (only on Android)
+ * When enabled, mutex _turboModuleManagerDelegateMutex in RCTTurboModuleManager will not be used
  */
-export const loadVectorDrawablesOnImages: Getter<boolean> = createNativeFlagGetter('loadVectorDrawablesOnImages', true);
+export const removeTurboModuleManagerDelegateMutex: Getter<boolean> = createNativeFlagGetter('removeTurboModuleManagerDelegateMutex', false);
+/**
+ * Throw an exception instead of deadlocking when a TurboModule that requires main queue setup is initialized during a synchronous render on iOS.
+ */
+export const throwExceptionInsteadOfDeadlockOnTurboModuleSetupDuringSyncRenderIOS: Getter<boolean> = createNativeFlagGetter('throwExceptionInsteadOfDeadlockOnTurboModuleSetupDuringSyncRenderIOS', false);
 /**
  * Enables storing js caller stack when creating promise in native module. This is useful in case of Promise rejection and tracing the cause.
  */
@@ -341,17 +309,9 @@ export const useEditTextStockAndroidFocusBehavior: Getter<boolean> = createNativ
  */
 export const useFabricInterop: Getter<boolean> = createNativeFlagGetter('useFabricInterop', false);
 /**
- * Invoke callbacks immediately on the ReactInstance rather than going through a background thread for synchronization
- */
-export const useImmediateExecutorInAndroidBridgeless: Getter<boolean> = createNativeFlagGetter('useImmediateExecutorInAndroidBridgeless', true);
-/**
  * When enabled, the native view configs are used in bridgeless mode.
  */
 export const useNativeViewConfigsInBridgelessMode: Getter<boolean> = createNativeFlagGetter('useNativeViewConfigsInBridgelessMode', false);
-/**
- * Moves more of the work in view preallocation to the main thread to free up JS thread.
- */
-export const useOptimisedViewPreallocationOnAndroid: Getter<boolean> = createNativeFlagGetter('useOptimisedViewPreallocationOnAndroid', false);
 /**
  * Uses an optimized mechanism for event batching on Android that does not need to wait for a Choreographer frame callback.
  */
@@ -360,10 +320,6 @@ export const useOptimizedEventBatchingOnAndroid: Getter<boolean> = createNativeF
  * Instead of using folly::dynamic as internal representation in RawProps and RawValue, use jsi::Value
  */
 export const useRawPropsJsiValue: Getter<boolean> = createNativeFlagGetter('useRawPropsJsiValue', false);
-/**
- * When enabled, cloning shadow nodes within react native will update the reference held by the current JS fiber tree.
- */
-export const useRuntimeShadowNodeReferenceUpdate: Getter<boolean> = createNativeFlagGetter('useRuntimeShadowNodeReferenceUpdate', true);
 /**
  * In Bridgeless mode, should legacy NativeModules use the TurboModule system?
  */

@@ -24,7 +24,7 @@ import type {
 } from '@react-native/assets-registry/registry';
 
 const PixelRatio = require('../Utilities/PixelRatio').default;
-const Platform = require('../Utilities/Platform');
+const Platform = require('../Utilities/Platform').default;
 const {pickScale} = require('./AssetUtils');
 const {
   getAndroidResourceFolderName,
@@ -210,4 +210,4 @@ class AssetSourceResolver {
     pickScale;
 }
 
-module.exports = AssetSourceResolver;
+export default AssetSourceResolver;

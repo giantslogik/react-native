@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <folly/Conv.h>
 #include <folly/dynamic.h>
 #include <react/debug/react_native_expect.h>
 #include <react/renderer/attributedstring/AttributedString.h>
@@ -250,7 +249,7 @@ inline void fromRawValue(
 }
 
 inline std::string toString(const FontWeight& fontWeight) {
-  return folly::to<std::string>((int)fontWeight);
+  return std::to_string((int)fontWeight);
 }
 
 inline void fromRawValue(
@@ -967,8 +966,8 @@ inline void fromRawValue(
 }
 
 inline std::string toString(const AttributedString::Range& range) {
-  return "{location: " + folly::to<std::string>(range.location) +
-      ", length: " + folly::to<std::string>(range.length) + "}";
+  return "{location: " + std::to_string(range.location) +
+      ", length: " + std::to_string(range.length) + "}";
 }
 
 #ifdef ANDROID
@@ -1017,6 +1016,7 @@ constexpr static MapBuffer::Key TA_KEY_LINE_BREAK_STRATEGY = 25;
 constexpr static MapBuffer::Key TA_KEY_ROLE = 26;
 constexpr static MapBuffer::Key TA_KEY_TEXT_TRANSFORM = 27;
 constexpr static MapBuffer::Key TA_KEY_ALIGNMENT_VERTICAL = 28;
+constexpr static MapBuffer::Key TA_KEY_MAX_FONT_SIZE_MULTIPLIER = 29;
 
 // constants for ParagraphAttributes serialization
 constexpr static MapBuffer::Key PA_KEY_MAX_NUMBER_OF_LINES = 0;
@@ -1110,6 +1110,10 @@ inline MapBuffer toMapBuffer(const TextAttributes& textAttributes) {
   if (textAttributes.allowFontScaling.has_value()) {
     builder.putBool(
         TA_KEY_ALLOW_FONT_SCALING, *textAttributes.allowFontScaling);
+  }
+  if (!std::isnan(textAttributes.maxFontSizeMultiplier)) {
+    builder.putDouble(
+        TA_KEY_MAX_FONT_SIZE_MULTIPLIER, textAttributes.maxFontSizeMultiplier);
   }
   if (!std::isnan(textAttributes.letterSpacing)) {
     builder.putDouble(TA_KEY_LETTER_SPACING, textAttributes.letterSpacing);

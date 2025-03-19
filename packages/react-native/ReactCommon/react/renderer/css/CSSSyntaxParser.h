@@ -9,11 +9,12 @@
 
 #include <concepts>
 #include <optional>
-#include <vector>
 
 #include <react/renderer/css/CSSTokenizer.h>
 
 namespace facebook::react {
+
+class CSSSyntaxParser;
 
 /**
  * Describes context for a CSS function component value.
@@ -35,22 +36,30 @@ struct CSSSimpleBlock {
 };
 
 /**
+ * Describes a valid return type for a CSSSyntaxParser visitor
+ */
+template <typename T>
+concept CSSSyntaxVisitorReturn =
+    std::is_default_constructible_v<T> && std::equality_comparable<T>;
+
+/**
  * A CSSFunctionVisitor is called to start parsing a function component value.
  * At this point, the Parser is positioned at the start of the function
  * component value list. It is expected that the visitor finishes before the end
  * of the function block.
  */
 template <typename T, typename ReturnT>
-concept CSSFunctionVisitor = requires(T visitor, CSSFunctionBlock func) {
-  { visitor(func) } -> std::convertible_to<ReturnT>;
-};
+concept CSSFunctionVisitor = CSSSyntaxVisitorReturn<ReturnT> &&
+    requires(T visitor, CSSFunctionBlock func, CSSSyntaxParser& blockParser) {
+      { visitor(func, blockParser) } -> std::convertible_to<ReturnT>;
+    };
 
 /**
  * A CSSPreservedTokenVisitor is called after parsing a preserved token
  * component value.
  */
 template <typename T, typename ReturnT>
-concept CSSPreservedTokenVisitor =
+concept CSSPreservedTokenVisitor = CSSSyntaxVisitorReturn<ReturnT> &&
     requires(T visitor, CSSPreservedToken token) {
       { visitor(token) } -> std::convertible_to<ReturnT>;
     };
@@ -61,23 +70,25 @@ concept CSSPreservedTokenVisitor =
  * of the block.
  */
 template <typename T, typename ReturnT>
-concept CSSSimpleBlockVisitor = requires(T visitor, CSSSimpleBlock block) {
-  { visitor(block) } -> std::convertible_to<ReturnT>;
-};
+concept CSSSimpleBlockVisitor = CSSSyntaxVisitorReturn<ReturnT> &&
+    requires(T visitor, CSSSimpleBlock block, CSSSyntaxParser& blockParser) {
+      { visitor(block, blockParser) } -> std::convertible_to<ReturnT>;
+    };
 
 /**
  * Any visitor for a component value.
  */
 template <typename T, typename ReturnT>
-concept CSSComponentValueVisitor = CSSFunctionVisitor<T, ReturnT> ||
-    CSSPreservedTokenVisitor<T, ReturnT> || CSSSimpleBlockVisitor<T, ReturnT>;
+concept CSSComponentValueVisitor = CSSSyntaxVisitorReturn<ReturnT> &&
+    (CSSFunctionVisitor<T, ReturnT> || CSSPreservedTokenVisitor<T, ReturnT> ||
+     CSSSimpleBlockVisitor<T, ReturnT>);
 
 /**
  * Represents a variadic set of CSSComponentValueVisitor with no more than one
  * of a specific type of visitor.
  */
 template <typename ReturnT, typename... VisitorsT>
-concept CSSUniqueComponentValueVisitors =
+concept CSSUniqueComponentValueVisitors = CSSSyntaxVisitorReturn<ReturnT> &&
     (CSSComponentValueVisitor<VisitorsT, ReturnT> && ...) &&
     ((CSSFunctionVisitor<VisitorsT, ReturnT> ? 1 : 0) + ... + 0) <= 1 &&
     ((CSSPreservedTokenVisitor<VisitorsT, ReturnT> ? 1 : 0) + ... + 0) <= 1 &&
@@ -86,9 +97,13 @@ concept CSSUniqueComponentValueVisitors =
 /**
  * Describes the delimeter to expect before the next component value.
  */
-enum class CSSComponentValueDelimiter {
-  Comma,
+enum class CSSDelimiter {
   Whitespace,
+  OptionalWhitespace,
+  Solidus,
+  SolidusOrWhitespace,
+  Comma,
+  CommaOrWhitespace,
   None,
 };
 
@@ -99,7 +114,9 @@ enum class CSSComponentValueDelimiter {
  * https://www.w3.org/TR/css-syntax-3/#component-value
  */
 class CSSSyntaxParser {
-  template <typename ReturnT, CSSComponentValueVisitor<ReturnT>... VisitorsT>
+  template <
+      CSSSyntaxVisitorReturn ReturnT,
+      CSSComponentValueVisitor<ReturnT>... VisitorsT>
   friend struct CSSComponentValueVisitorDispatcher;
 
  public:
@@ -123,6 +140,11 @@ class CSSSyntaxParser {
    * higher-level data structure, and continue parsing within its scope using
    * the same underlying CSSSyntaxParser.
    *
+   * The state of the parser is reset if a visitor returns a default-constructed
+   * value for the given return type, even if it previously advanced the parser.
+   * If no visitor returns a non-default-constructed value, the component value
+   * will not be consumed.
+   *
    * https://www.w3.org/TR/css-syntax-3/#consume-component-value
    *
    * @param <ReturnT> caller-specified return type of visitors. This type will
@@ -135,17 +157,16 @@ class CSSSyntaxParser {
    * @returns the visitor returned value, or a default constructed value if no
    * visitor was matched, or a syntax error occurred.
    */
-  template <typename ReturnT>
+  template <CSSSyntaxVisitorReturn ReturnT>
   constexpr ReturnT consumeComponentValue(
-      CSSComponentValueDelimiter delimiter,
+      CSSDelimiter delimiter,
       const CSSComponentValueVisitor<ReturnT> auto&... visitors)
     requires(CSSUniqueComponentValueVisitors<ReturnT, decltype(visitors)...>);
 
-  template <typename ReturnT>
+  template <CSSSyntaxVisitorReturn ReturnT>
   constexpr ReturnT consumeComponentValue(
       const CSSComponentValueVisitor<ReturnT> auto&... visitors)
     requires(CSSUniqueComponentValueVisitors<ReturnT, decltype(visitors)...>);
-
   /**
    * The parser is considered finished when there are no more remaining tokens
    * to be processed
@@ -163,7 +184,65 @@ class CSSSyntaxParser {
     }
   }
 
+  /**
+   * Consume a delimiter, returning false if a required delimiter is not found.
+   */
+  constexpr bool consumeDelimiter(CSSDelimiter delimiter) {
+    if (delimiter == CSSDelimiter::None) {
+      return true;
+    }
+
+    bool hasWhiteSpace = peek().type() == CSSTokenType::WhiteSpace;
+    consumeWhitespace();
+
+    switch (delimiter) {
+      case CSSDelimiter::Comma:
+        if (peek().type() == CSSTokenType::Comma) {
+          consumeToken();
+          consumeWhitespace();
+          return true;
+        }
+        return false;
+      case CSSDelimiter::Whitespace:
+        return hasWhiteSpace;
+      case CSSDelimiter::OptionalWhitespace:
+        return true;
+      case CSSDelimiter::CommaOrWhitespace:
+        if (peek().type() == CSSTokenType::Comma) {
+          consumeToken();
+          consumeWhitespace();
+          return true;
+        }
+        return hasWhiteSpace;
+      case CSSDelimiter::Solidus:
+        if (peek().type() == CSSTokenType::Delim &&
+            peek().stringValue() == "/") {
+          consumeToken();
+          consumeWhitespace();
+          return true;
+        }
+        return false;
+      case CSSDelimiter::SolidusOrWhitespace:
+        if (peek().type() == CSSTokenType::Delim &&
+            peek().stringValue() == "/") {
+          consumeToken();
+          consumeWhitespace();
+          return true;
+        }
+        return hasWhiteSpace;
+      case CSSDelimiter::None:
+        return true;
+    }
+
+    return false;
+  }
+
  private:
+  constexpr CSSSyntaxParser(CSSSyntaxParser& parser, CSSTokenType terminator)
+      : tokenizer_{parser.tokenizer_},
+        currentToken_{parser.currentToken_},
+        terminator_{terminator} {}
+
   constexpr const CSSToken& peek() const {
     return currentToken_;
   }
@@ -174,31 +253,34 @@ class CSSSyntaxParser {
     return prevToken;
   }
 
+  constexpr void advanceToBlockParser(CSSSyntaxParser& blockParser) {
+    currentToken_ = blockParser.currentToken_;
+    tokenizer_ = blockParser.tokenizer_;
+  }
+
   CSSTokenizer tokenizer_;
   CSSToken currentToken_;
+  CSSTokenType terminator_{CSSTokenType::EndOfFile};
 };
 
-template <typename ReturnT, CSSComponentValueVisitor<ReturnT>... VisitorsT>
+template <
+    CSSSyntaxVisitorReturn ReturnT,
+    CSSComponentValueVisitor<ReturnT>... VisitorsT>
 struct CSSComponentValueVisitorDispatcher {
   CSSSyntaxParser& parser;
 
   constexpr ReturnT consumeComponentValue(
-      CSSComponentValueDelimiter delimiter,
+      CSSDelimiter delimiter,
       const VisitorsT&... visitors) {
-    switch (delimiter) {
-      case CSSComponentValueDelimiter::Comma:
-        parser.consumeWhitespace();
-        if (parser.peek().type() != CSSTokenType::Comma) {
-          return ReturnT{};
-        }
-        parser.consumeToken();
-        parser.consumeWhitespace();
-        break;
-      case CSSComponentValueDelimiter::Whitespace:
-        parser.consumeWhitespace();
-        break;
-      case CSSComponentValueDelimiter::None:
-        break;
+    auto originalParser = parser;
+    if (!parser.consumeDelimiter(delimiter)) {
+      parser = originalParser;
+      return {};
+    }
+
+    if (parser.peek().type() == parser.terminator_) {
+      parser = originalParser;
+      return {};
     }
 
     switch (parser.peek().type()) {
@@ -232,33 +314,29 @@ struct CSSComponentValueVisitorDispatcher {
         break;
     }
 
+    parser = originalParser;
     return ReturnT{};
-  }
-
-  constexpr ReturnT consumeNextCommaDelimitedValue(
-      const VisitorsT&... visitors) {
-    parser.consumeWhitespace();
-    if (parser.consumeToken().type() != CSSTokenType::Comma) {
-      return {};
-    }
-    parser.consumeWhitespace();
-    return consumeComponentValue(std::forward<VisitorsT>(visitors)...);
-  }
-
-  constexpr ReturnT consumeNextWhitespaceDelimitedValue(
-      const VisitorsT&... visitors) {
-    parser.consumeWhitespace();
-    return consumeComponentValue(std::forward<VisitorsT>(visitors)...);
   }
 
   constexpr std::optional<ReturnT> visitFunction(
       const CSSComponentValueVisitor<ReturnT> auto& visitor,
       const CSSComponentValueVisitor<ReturnT> auto&... rest) {
     if constexpr (CSSFunctionVisitor<decltype(visitor), ReturnT>) {
-      auto functionValue =
-          visitor({.name = parser.consumeToken().stringValue()});
+      auto name = parser.consumeToken().stringValue();
+
+      // CSS syntax spec says whitespace is a preserved token, but CSS values
+      // spec allows whitespace around parens for all function notation, so we
+      // allow this to let the visitors not need to deal with leading/trailing
+      // whitespace. https://www.w3.org/TR/css-values-3/#functional-notations
       parser.consumeWhitespace();
-      if (parser.peek().type() == CSSTokenType::CloseParen) {
+
+      auto blockParser =
+          CSSSyntaxParser{parser, CSSTokenType::CloseParen /*terminator*/};
+      auto functionValue = visitor({name}, blockParser);
+      parser.advanceToBlockParser(blockParser);
+      parser.consumeWhitespace();
+      if (parser.peek().type() == CSSTokenType::CloseParen &&
+          functionValue != ReturnT{}) {
         parser.consumeToken();
         return functionValue;
       }
@@ -273,18 +351,18 @@ struct CSSComponentValueVisitorDispatcher {
     return {};
   }
 
-  // Can be one of std::monostate (variant null-type), CSSWideKeyword,
-  // CSSLength, or CSSPercentage
-
   constexpr std::optional<ReturnT> visitSimpleBlock(
       CSSTokenType endToken,
       const CSSComponentValueVisitor<ReturnT> auto& visitor,
       const CSSComponentValueVisitor<ReturnT> auto&... rest) {
     if constexpr (CSSSimpleBlockVisitor<decltype(visitor), ReturnT>) {
-      auto blockValue =
-          visitor({.openBracketType = parser.consumeToken().type()});
+      auto openBracketType = parser.consumeToken().type();
       parser.consumeWhitespace();
-      if (parser.peek().type() == endToken) {
+      auto blockParser = CSSSyntaxParser{parser, endToken};
+      auto blockValue = visitor({openBracketType}, blockParser);
+      parser.advanceToBlockParser(blockParser);
+      parser.consumeWhitespace();
+      if (parser.peek().type() == endToken && blockValue != ReturnT{}) {
         parser.consumeToken();
         return blockValue;
       }
@@ -294,7 +372,7 @@ struct CSSComponentValueVisitorDispatcher {
     return visitSimpleBlock(endToken, rest...);
   }
 
-  constexpr std::optional<ReturnT> visitSimpleBlock(CSSTokenType /*endToken*/) {
+  constexpr std::optional<ReturnT> visitSimpleBlock(CSSTokenType endToken) {
     return {};
   }
 
@@ -302,7 +380,10 @@ struct CSSComponentValueVisitorDispatcher {
       const CSSComponentValueVisitor<ReturnT> auto& visitor,
       const CSSComponentValueVisitor<ReturnT> auto&... rest) {
     if constexpr (CSSPreservedTokenVisitor<decltype(visitor), ReturnT>) {
-      return visitor(parser.consumeToken());
+      auto ret = visitor(parser.consumeToken());
+      if (ret != ReturnT{}) {
+        return ret;
+      }
     }
     return visitPreservedToken(rest...);
   }
@@ -312,9 +393,9 @@ struct CSSComponentValueVisitorDispatcher {
   }
 };
 
-template <typename ReturnT>
+template <CSSSyntaxVisitorReturn ReturnT>
 constexpr ReturnT CSSSyntaxParser::consumeComponentValue(
-    CSSComponentValueDelimiter delimiter,
+    CSSDelimiter delimiter,
     const CSSComponentValueVisitor<ReturnT> auto&... visitors)
   requires(CSSUniqueComponentValueVisitors<ReturnT, decltype(visitors)...>)
 {
@@ -323,13 +404,12 @@ constexpr ReturnT CSSSyntaxParser::consumeComponentValue(
       .consumeComponentValue(delimiter, visitors...);
 }
 
-template <typename ReturnT>
+template <CSSSyntaxVisitorReturn ReturnT>
 constexpr ReturnT CSSSyntaxParser::consumeComponentValue(
     const CSSComponentValueVisitor<ReturnT> auto&... visitors)
   requires(CSSUniqueComponentValueVisitors<ReturnT, decltype(visitors)...>)
 {
-  return consumeComponentValue<ReturnT>(
-      CSSComponentValueDelimiter::None, visitors...);
+  return consumeComponentValue<ReturnT>(CSSDelimiter::None, visitors...);
 }
 
 } // namespace facebook::react

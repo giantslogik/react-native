@@ -9,6 +9,7 @@
 
 #include <optional>
 
+#include <react/renderer/css/CSSColorFunction.h>
 #include <react/renderer/css/CSSDataType.h>
 #include <react/renderer/css/CSSHexColor.h>
 #include <react/renderer/css/CSSNamedColor.h>
@@ -24,6 +25,12 @@ struct CSSColor {
   uint8_t g{};
   uint8_t b{};
   uint8_t a{};
+
+  constexpr bool operator==(const CSSColor& rhs) const = default;
+
+  static constexpr CSSColor black() {
+    return {0, 0, 0, 255};
+  }
 };
 
 template <>
@@ -38,6 +45,12 @@ struct CSSDataTypeParser<CSSColor> {
       default:
         return {};
     }
+  }
+
+  static constexpr auto consumeFunctionBlock(
+      const CSSFunctionBlock& func,
+      CSSSyntaxParser& parser) -> std::optional<CSSColor> {
+    return parseCSSColorFunction<CSSColor>(func.name, parser);
   }
 };
 

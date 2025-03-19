@@ -9,8 +9,9 @@
  * @oncall react_native
  */
 
+require('../babel-register').registerForScript();
+
 const {PACKAGES_DIR, REPO_ROOT} = require('../consts');
-const buildRNTypes = require('./buildRNTypes');
 const {
   buildConfig,
   getBabelConfig,
@@ -37,7 +38,6 @@ const config = {
   allowPositionals: true,
   options: {
     check: {type: 'boolean'},
-    experimentalBuildRNTypes: {type: 'boolean'},
     help: {type: 'boolean'},
   },
 };
@@ -45,7 +45,7 @@ const config = {
 async function build() {
   const {
     positionals: packageNames,
-    values: {check, experimentalBuildRNTypes, help},
+    values: {check, help},
   } = parseArgs(config);
 
   if (help) {
@@ -60,9 +60,6 @@ async function build() {
   Options:
     --check           Validate that no build artifacts have been accidentally
                       committed.
-    --experimentalBuildRNTypes
-                      [Experimental] Enable source code -> type translation
-                      output for the react-native package.
     `);
     process.exitCode = 0;
     return;
@@ -72,25 +69,9 @@ async function build() {
     console.log('\n' + chalk.bold.inverse('Building packages') + '\n');
   }
 
-  let packagesToBuild = packageNames.length
+  const packagesToBuild = packageNames.length
     ? packageNames.filter(packageName => packageName in buildConfig.packages)
     : Object.keys(buildConfig.packages);
-
-  if (packagesToBuild.includes('react-native')) {
-    // Remove react-native from the list of packages to build, only type generation is implemented
-    packagesToBuild = packagesToBuild.filter(
-      packageName => packageName !== 'react-native',
-    );
-
-    if (experimentalBuildRNTypes) {
-      await emitReactNativeTypes();
-    } else if (packagesToBuild.length === 0) {
-      console.warn(
-        'Building the react-native package must be enabled using ' +
-          '--experimentalBuildRNTypes.',
-      );
-    }
-  }
 
   let ok = true;
   for (const packageName of packagesToBuild) {
@@ -102,10 +83,6 @@ async function build() {
   }
 
   process.exitCode = ok ? 0 : 1;
-}
-
-async function emitReactNativeTypes() {
-  await buildRNTypes();
 }
 
 async function checkPackage(packageName /*: string */) /*: Promise<boolean> */ {

@@ -81,14 +81,6 @@ ReactInstance::ReactInstance(
             try {
               ShadowNode::setUseRuntimeShadowNodeReferenceUpdateOnThread(true);
               callback(jsiRuntime);
-
-              // If we have first-class support for microtasks,
-              // they would've been called as part of the previous callback.
-              if (ReactNativeFeatureFlags::disableEventLoopOnBridgeless()) {
-                if (auto timerManager = weakTimerManager.lock()) {
-                  timerManager->callReactNativeMicrotasks(jsiRuntime);
-                }
-              }
             } catch (jsi::JSError& originalError) {
               jsErrorHandler->handleError(jsiRuntime, originalError, true);
             } catch (std::exception& ex) {
@@ -338,7 +330,7 @@ void ReactInstance::registerSegment(
                << segmentId;
   runtimeScheduler_->scheduleWork([=](jsi::Runtime& runtime) {
     TraceSection s("ReactInstance::registerSegment");
-    const auto tag = folly::to<std::string>(segmentId);
+    auto tag = std::to_string(segmentId);
     auto script = JSBigFileString::fromPath(segmentPath);
     if (script->size() == 0) {
       throw std::invalid_argument(
